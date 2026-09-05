@@ -24,4 +24,32 @@ test.describe('Home Page', () => {
     // Check that the welcome message is present using more specific locator
     await expect(page.getByText('Find your next game! And maybe even back one! Explore our collection!')).toBeVisible();
   });
+
+  test('should filter the catalog by category and publisher and preserve selections after applying', async ({ page }) => {
+    await expect(page.getByTestId('game-filters-form')).toBeVisible();
+
+    const categoryInput = page.locator('input[name="category"]').first();
+    await expect(categoryInput).toBeVisible();
+    const categoryValue = await categoryInput.getAttribute('value');
+    await categoryInput.check();
+
+    const publisherFilter = page.getByTestId('publisher-filter');
+    await expect(publisherFilter).toBeVisible();
+    await publisherFilter.selectOption({ index: 1 });
+    const publisherValue = await publisherFilter.inputValue();
+
+    await page.getByTestId('apply-filters-button').click();
+
+    await expect(page).toHaveURL(/\?.*category=/);
+    await expect(page).toHaveURL(/\?.*publisher=/);
+    await expect(page.locator(`input[name="category"][value="${categoryValue}"]`)).toBeChecked();
+    await expect(publisherFilter).toHaveValue(publisherValue);
+
+    const visibleCards = await page.locator('[data-testid="game-card"]').evaluateAll((items) =>
+      items.filter((item) => item instanceof HTMLElement && !item.hidden).length,
+    );
+    const totalCards = await page.locator('[data-testid="game-card"]').count();
+    expect(visibleCards).toBeGreaterThan(0);
+    expect(visibleCards).toBeLessThan(totalCards);
+  });
 });
