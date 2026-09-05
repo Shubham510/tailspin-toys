@@ -35,9 +35,17 @@ export default [
 
   // TypeScript-specific overrides
   {
-    files: ["**/*.ts"],
+    files: ["db/**/*.ts", "src/lib/**/*.ts", "src/types/**/*.ts"],
     languageOptions: {
       parser: tseslint.parser,
+    },
+    rules: {
+      // Keep TypeScript source readable and consistent without requiring a formatter.
+      indent: ["error", 4, { SwitchCase: 1 }],
+      quotes: ["error", "single", { avoidEscape: true }],
+      semi: ["error", "always"],
+      "object-curly-spacing": ["error", "always"],
+      "array-bracket-spacing": ["error", "never"],
     },
   },
 ];
